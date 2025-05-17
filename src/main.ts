@@ -2,6 +2,7 @@
 import "../style.css";
 import "flowbite";
 import { bech32 } from "bech32";
+import QRCode from "qrcode";
 
 // Insert the app HTML into #app
 document.getElementById("app")!.innerHTML = `
@@ -47,10 +48,10 @@ document.getElementById("app")!.innerHTML = `
         <div id="qr" class="mb-4"></div>
         <div class="w-full flex flex-col items-center">
           <strong class="mb-1">Invoice:</strong>
-          <div class="flex items-center w-full">
-            <div id="invoice" class="break-all bg-white border border-gray-200 rounded-md px-2 py-1 text-xs w-full"></div>
-            <button id="copy-btn" type="button" class="ml-2 text-gray-500 hover:text-blue-700" title="Copy invoice">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16h8M8 12h8m-7 8h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"/></svg>
+          <div class="flex items-center w-full gap-2">
+            <div id="invoice" class="truncate bg-white border border-gray-200 rounded-md px-2 py-1 text-xs w-full whitespace-nowrap select-all" aria-label="Lightning Invoice"></div>
+            <button id="copy-btn" type="button" class="ml-2 text-gray-500 hover:text-blue-700 focus:ring-2 focus:ring-blue-300 rounded-lg p-1.5" title="Copy invoice" aria-label="Copy invoice">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 4v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4m0 0a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2zm0 0v2m0 0a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4"/></svg>
             </button>
           </div>
         </div>
@@ -111,10 +112,11 @@ document.querySelectorAll('.numpad-btn').forEach(btn => {
 });
 
 // --- Existing PoS logic, only run if lnInputValue is set ---
-// Simple QR code generator (no dependencies)
-function makeQR(text: string, size = 256): string {
-  // Use Google Chart API for QR (for demo only, not for prod)
-  return `<img src="https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(text)}" alt="QR Code" class="rounded-lg border border-gray-300">`;
+// Replace makeQR with async QR code generation using 'qrcode' as SVG
+async function makeQR(text: string, size = 256): Promise<string> {
+  const svg = await QRCode.toString(text, { type: 'svg', width: size, margin: 2 });
+  // Add Tailwind/Flowbite classes to the SVG root element
+  return svg.replace('<svg', `<svg class=\"rounded-lg border border-gray-300\" width=\"${size}\" height=\"${size}\"`);
 }
 
 async function fetchJson(url: string) {
@@ -167,14 +169,17 @@ if (lnInputValue) {
       const verifyUrl = invoiceResp.verify; // LUD-21
       // 3. Show invoice
       (document.getElementById('invoice-section') as HTMLElement).style.display = "";
-      (document.getElementById('qr') as HTMLElement).innerHTML = makeQR(pr);
       (document.getElementById('invoice') as HTMLElement).textContent = pr;
       (document.getElementById('status') as HTMLElement).textContent = "Waiting for payment...";
+      // Generate and display QR code
+      makeQR(pr).then(qrHtml => {
+        (document.getElementById('qr') as HTMLElement).innerHTML = qrHtml;
+      });
       // Copy button
       (document.getElementById('copy-btn') as HTMLElement).onclick = function() {
         navigator.clipboard.writeText(pr);
-        this.classList.add('text-green-600');
-        setTimeout(() => this.classList.remove('text-green-600'), 1000);
+        (this as HTMLButtonElement).classList.add('text-green-600');
+        setTimeout(() => (this as HTMLButtonElement).classList.remove('text-green-600'), 1000);
       };
       // 4. Poll LUD-21 verify endpoint
       if (!verifyUrl) {
