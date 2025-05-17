@@ -2,17 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AddressForm from './components/AddressForm';
 import Numpad from './components/Numpad';
 import PaymentSection from './components/PaymentSection';
+import { getParam, setParam } from './utils/urlParams';
 // import { Button } from 'flowbite-react';
-
-function getParam(name: string): string | null {
-  const url = new URL(window.location.href);
-  return url.searchParams.get(name);
-}
-function setParam(name: string, value: string) {
-  const url = new URL(window.location.href);
-  url.searchParams.set(name, value);
-  window.history.replaceState({}, '', url.toString());
-}
 
 const App: React.FC = () => {
   const [lnInput, setLnInput] = useState<string | null>(null);

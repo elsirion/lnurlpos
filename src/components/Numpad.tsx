@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Button, Label, TextInput } from 'flowbite-react';
+import React, { useState, useEffect } from 'react';
+import { Button, Label, TextInput, Select } from 'flowbite-react';
+import { getCurrencyRateMap } from '../utils/currency';
+import { getParam, setParam } from '../utils/urlParams';
 
 interface NumpadProps {
   onSubmit: (amount: number) => void;
@@ -39,6 +41,24 @@ const NumpadGrid: React.FC<NumpadGridProps> = ({ value, onNumpadClick }) => {
 const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+  const [currencies, setCurrencies] = useState<string[]>(['sat']);
+  const [currency, setCurrency] = useState<string>(getParam('currency') || 'sat');
+  const [rateMap, setRateMap] = useState<{ [k: string]: number }>({ sat: 1e8 });
+
+  useEffect(() => {
+    const update = () => {
+      const map = getCurrencyRateMap();
+      setRateMap(map);
+      setCurrencies(Object.keys(map));
+    };
+    update();
+    const interval = setInterval(update, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setParam('currency', currency);
+  }, [currency]);
 
   const handleNumpad = (val: string) => {
     if (val === '.') {
@@ -47,11 +67,8 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
     } else if (val === '⌫') {
       setAmount(amount.slice(0, -1));
     } else {
-      // Only allow up to 9 characters, including decimal point
       if (amount.length >= 9) return;
-      // Prevent leading zeros
       if (amount === '0' && val !== '.') return;
-      // If there's a decimal, only allow up to 2 digits after it
       if (amount.includes('.')) {
         const [intPart, decPart] = amount.split('.');
         if (decPart.length >= 2) return;
@@ -72,13 +89,25 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
       return;
     }
     setError('');
-    onSubmit(Math.round(num * 100) / 100);
+    // Convert to sats for onSubmit
+    const sats = currency === 'sat' ? num : Math.round((num * rateMap[currency]) * 1e8);
+    onSubmit(sats);
   };
+
+  // Calculate sats for label
+  let satsValue = 0;
+  if (amount && !isNaN(Number(amount)) && rateMap[currency]) {
+    if (currency === 'sat') {
+      satsValue = parseFloat(amount);
+    } else {
+      satsValue = Math.round(parseFloat(amount) * rateMap[currency] * 1e8);
+    }
+  }
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
-        <Label htmlFor="amount">Amount (sats)</Label>
+        <Label htmlFor="amount">Amount ({currency})</Label>
         <TextInput
           id="amount"
           type="text"
@@ -88,10 +117,25 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
           className="text-2xl text-center"
           placeholder="0"
         />
+        <div className="text-xs text-gray-500 mt-1 text-center">
+          ≈ {satsValue} sats
+        </div>
       </div>
       <NumpadGrid value={amount} onNumpadClick={handleNumpad} />
       {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
       <Button type="submit" className="w-full" color="blue">Request Invoice</Button>
+      <div className="flex justify-center items-center gap-2 mb-2">
+        <span className="text-xs text-gray-500">Currency</span>
+        <select
+          value={currency}
+          onChange={e => setCurrency(e.target.value)}
+          className="text-xs text-gray-700 outline-none focus:ring-0 border-none bg-transparent p-0 m-0 appearance-none"
+        >
+          {currencies.map(cur => (
+            <option key={cur} value={cur}>{cur}</option>
+          ))}
+        </select>
+      </div>
     </form>
   );
 };
