@@ -24,7 +24,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSubmit }) => {
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
-        <Label htmlFor="address-input" value="Lightning Address or LNURLp" />
+        <Label htmlFor="address-input" className="text-gray-700 text-xs">Lightning Address or LNURLp</Label>
         <TextInput
           id="address-input"
           type="text"
@@ -32,10 +32,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSubmit }) => {
           placeholder="someone@domain.com or lnurl1..."
           value={value}
           onChange={e => setValue(e.target.value)}
+          className="mt-1"
         />
         {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
       </div>
-      <Button type="submit" className="w-full">Continue</Button>
+      <Button type="submit" color="blue" className="w-full">Continue</Button>
     </form>
   );
 };

@@ -23,10 +23,10 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ qr, invoice, status, er
     <div className="mb-4 w-full flex flex-col items-center">
       {qr && <div className="mb-4 w-full" dangerouslySetInnerHTML={{ __html: qr }} />}
       <div className="flex items-center w-full gap-2">
-        <div className="truncate bg-white border border-gray-200 rounded-md px-2 py-1 text-xs w-full whitespace-nowrap select-all" aria-label="Lightning Invoice">{invoice}</div>
+        <div className="truncate bg-white border border-gray-200 rounded-md px-2 py-2 text-xs w-full whitespace-nowrap select-all" aria-label="Lightning Invoice">{invoice}</div>
         <Tooltip content="Copy invoice">
-          <Button size="xs" color="gray" onClick={onCopy}>
-            <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <Button size="xs" className='' color="blue" onClick={onCopy}>
+            <svg className="w-4 h- text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
             </svg>
           </Button>
@@ -40,7 +40,7 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ qr, invoice, status, er
       {error && <Alert color="failure" className="mb-2">Error: {error}</Alert>}
       {!error && !status.includes('✅') && status && <div>{status}</div>}
     </div>
-    <Button className="mt-6 w-full" color="gray" onClick={onBack}>
+    <Button className="mt-6 w-full" color="blue" onClick={onBack}>
       <svg className="w-5 h-5 mr-2 -ml-1" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrow-left" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M257.5 445.1c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0l-192-192c-12.5-12.5-12.5-32.8 0-45.3l192-192c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3L109.3 224H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H109.3l148.2 149.1z"></path></svg>
       Back
     </Button>

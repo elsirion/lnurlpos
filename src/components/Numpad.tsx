@@ -23,7 +23,7 @@ const NumpadGrid: React.FC<NumpadGridProps> = ({ value, onNumpadClick }) => {
         <Button
           key={i}
           type="button"
-          color="gray"
+          color="alternative"
           className="py-4 text-xl"
           onClick={() => onNumpadClick(b)}
         >
