@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Spinner, Tooltip, Alert } from 'flowbite-react';
+import { Button, Spinner, Tooltip, Alert, TextInput } from 'flowbite-react';
 import QRCode from 'qrcode';
 import { bech32Decode, getLnurlpEndpoint, fetchJson } from '../utils/lnurl';
 
@@ -21,9 +21,14 @@ interface PaymentDisplayProps {
 const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ qr, invoice, status, error, onCopy, onBack }) => (
   <div className="flex flex-col items-center w-full">
     <div className="mb-4 w-full flex flex-col items-center">
-      {qr && <div className="mb-4 w-full" dangerouslySetInnerHTML={{ __html: qr }} />}
-      <div className="flex items-center w-full gap-2">
-        <div className="truncate bg-white border border-gray-200 rounded-md px-2 py-2 text-xs w-full whitespace-nowrap select-all" aria-label="Lightning Invoice">{invoice}</div>
+      {qr && <div className="mb-2 w-full" dangerouslySetInnerHTML={{ __html: qr }} />}
+      <div className="flex items-center gap-2 w-full">
+        <TextInput
+          sizing="sm"
+          aria-label="Lightning Invoice"
+          value={invoice}
+          className="flex-1"
+        />
         <Tooltip content="Copy invoice">
           <Button size="xs" className='' color="blue" onClick={onCopy}>
             <svg className="w-4 h- text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
