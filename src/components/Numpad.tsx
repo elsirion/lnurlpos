@@ -112,17 +112,19 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
-        <Label htmlFor="amount">Amount</Label>
-        <div className="flex mt-1">
-          <input
-            id="amount"
-            type="text"
-            min={0.01}
-            readOnly
-            value={amount}
+        <div className="flex mt-0.5">
+            <div className="relative">
+                <Label htmlFor="amount" className="absolute left-3 -top-2 bg-white px-0.5 text-gray-700 text-xs">Amount</Label>
+                <input
+                    id="amount"
+                    type="text"
+                    min={0.01}
+                    readOnly
+                    value={amount}
             placeholder="0"
-            className="block w-full p-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-s-lg rounded-e-none focus:ring-blue-500 focus:border-blue-500 h-10"
+            className="block w-full p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-s-lg rounded-e-none focus:ring-blue-500 focus:border-blue-500 h-10"
           />
+          </div>
           <select
             value={currency}
             onChange={e => setCurrency(e.target.value)}
