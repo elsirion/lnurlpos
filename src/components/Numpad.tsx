@@ -113,7 +113,7 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
     <form className="space-y-4" onSubmit={handleSubmit}>
       <div>
         <div className="flex mt-0.5">
-            <div className="relative">
+            <div className="relative w-full">
                 <Label htmlFor="amount" className="absolute left-3 -top-2 bg-white px-0.5 text-gray-700 text-xs">Amount</Label>
                 <input
                     id="amount"
