@@ -54,7 +54,7 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
     <div className="flex flex-col items-center w-full">
       <div className="mb-4 w-full flex flex-col items-center">
         <div className="relative mb-2 w-full aspect-square flex items-center justify-center">
-          {invoice ? (
+          {(invoice && !error) ? (
             qrSvg ? (
               <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
             ) : (
@@ -76,7 +76,7 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
           <TextInput
             sizing="sm"
             aria-label="Lightning Invoice"
-            value={invoice ?? ''}
+            value={error ? '' : invoice ?? ''}
             className="flex-1"
             readOnly
             disabled={paid}
@@ -90,14 +90,14 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
           </Tooltip>
         </div>
       </div>
-      <div className="mt-4 text-center font-semibold w-full break-words">
-        {!invoice && (
+      <div className="mt-4 text-center font-semibold w-full">
+        {!invoice && !error && (
             <Alert color="info">🕙 Waiting for invoice...</Alert>
         )}
         {paid && (
           <Alert color="success">✅ Payment received!</Alert>
         )}
-        {error && <Alert color="failure">Error: {error}</Alert>}
+        {error && <Alert color="failure" className="max-w-xs">Error: {error}</Alert>}
         {!error && !paid && invoice && <Alert color="info">🕙 Waiting for payment...</Alert>}
       </div>
       <Button className="mt-6 w-full" color="blue" onClick={onBack}>
