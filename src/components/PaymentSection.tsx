@@ -53,15 +53,25 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
   return (
     <div className="flex flex-col items-center w-full">
       <div className="mb-4 w-full flex flex-col items-center">
-        {invoice ? (
-          qrSvg ? (
-            <div className="mb-2 w-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+        <div className="relative mb-2 w-full aspect-square flex items-center justify-center">
+          {invoice ? (
+            qrSvg ? (
+              <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+            ) : (
+              placeholder
+            )
           ) : (
             placeholder
-          )
-        ) : (
-          placeholder
-        )}
+          )}
+          {paid && (
+            <div className="absolute inset-0 flex items-center justify-center bg-green-50 bg-opacity-95 z-10 rounded-lg animate-fade-in">
+              <svg className="w-32 h-32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="32" fill="#22C55E"/>
+                <path d="M20 34L29 43L44 25" stroke="white" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2 w-full">
           <TextInput
             sizing="sm"
@@ -69,10 +79,11 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
             value={invoice ?? ''}
             className="flex-1"
             readOnly
+            disabled={paid}
           />
-          <Tooltip content="Copy invoice">
-            <Button size="xs" className='' color="blue" onClick={onCopy}>
-              <svg className="w-4 h- text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <Tooltip content={paid ? 'Payment complete' : 'Copy invoice'}>
+            <Button size="xs" className='' color="blue" onClick={onCopy} disabled={paid}>
+              <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" strokeLinejoin="round" strokeWidth="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
               </svg>
             </Button>
