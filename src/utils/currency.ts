@@ -54,10 +54,31 @@ async function fetchRates(): Promise<CurrencyRateMap> {
   return map;
 }
 
+type RateListener = (rates: CurrencyRateMap) => void;
+const listeners: RateListener[] = [];
+
+export function subscribeToRates(listener: RateListener) {
+  listeners.push(listener);
+  // Immediately call with current rates
+  listener(cachedRates);
+  return () => {
+    // Unsubscribe
+    const idx = listeners.indexOf(listener);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
+}
+
+function notifyListeners() {
+  for (const listener of listeners) {
+    listener(cachedRates);
+  }
+}
+
 async function updateRates() {
   try {
     cachedRates = await fetchRates();
     saveRatesToLocalStorage(cachedRates);
+    notifyListeners(); // Notify all subscribers
   } catch (e) {
     // Ignore fetch errors, keep old cache
   }

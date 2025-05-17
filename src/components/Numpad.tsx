@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Label, TextInput, Select } from 'flowbite-react';
-import { getCurrencyRateMap } from '../utils/currency';
+import { subscribeToRates } from '../utils/currency';
 import { getParam, setParam } from '../utils/urlParams';
 
 interface NumpadProps {
@@ -51,17 +51,14 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
   const [error, setError] = useState('');
   const [currencies, setCurrencies] = useState<string[]>(['sat']);
   const [currency, setCurrency] = useState<string>(getParam('currency') || 'sat');
-  const [rateMap, setRateMap] = useState<{ [k: string]: number }>({ sat: 1e8 });
+  const [rateMap, setRateMap] = useState<{ [k: string]: number }>({ sat: 1e-8 });
 
   useEffect(() => {
-    const update = () => {
-      const map = getCurrencyRateMap();
+    const unsubscribe = subscribeToRates((map) => {
       setRateMap(map);
       setCurrencies(Object.keys(map));
-    };
-    update();
-    const interval = setInterval(update, 10000);
-    return () => clearInterval(interval);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
