@@ -10,7 +10,7 @@ interface PaymentSectionProps {
 }
 
 interface PaymentDisplayProps {
-  invoice: string;
+  invoice: string | null;
   paid: boolean;
   error: string;
   onCopy: () => void;
@@ -66,7 +66,7 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
           <TextInput
             sizing="sm"
             aria-label="Lightning Invoice"
-            value={invoice}
+            value={invoice ?? ''}
             className="flex-1"
             readOnly
           />
@@ -98,7 +98,7 @@ const PaymentDisplay: React.FC<PaymentDisplayProps> = ({ invoice, paid, error, o
 };
 
 const PaymentSection: React.FC<PaymentSectionProps> = ({ lnInput, amount, onBack }) => {
-  const [invoice, setInvoice] = useState('');
+  const [invoice, setInvoice] = useState<string | null>(null);
   const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
@@ -109,10 +109,13 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({ lnInput, amount, onBack
     async function requestInvoice() {
       try {
         setError('');
+        setInvoice(null);
+        setVerifyUrl(null);
+        setPaid(false);
+
         // 1. Get LNURLp endpoint
         const lnurlp = getLnurlpEndpoint(lnInput);
         const lnurlpResp = await fetchJson(lnurlp);
-        // 2. Request invoice
         const callback = lnurlpResp.callback;
         const min = lnurlpResp.minSendable / 1000, max = lnurlpResp.maxSendable / 1000;
         if (amount < min || amount > max) throw new Error(`Amount must be between ${min} and ${max} sats`);
@@ -120,8 +123,15 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({ lnInput, amount, onBack
         const invoiceResp = await fetchJson(cbUrl);
         if (invoiceResp.status === "ERROR") throw new Error(invoiceResp.reason);
         const pr = invoiceResp.pr;
+
+        // check if invoiceResp.verify is set
+        if (invoiceResp.verify) {
+          setVerifyUrl(invoiceResp.verify);
+        } else {
+          setError("Backend doesn't support LUD-21 verify");
+        }
+
         setInvoice(pr);
-        setVerifyUrl(invoiceResp.verify || null);
       } catch (err: any) {
         setError(err.message || 'Unknown error');
       }
