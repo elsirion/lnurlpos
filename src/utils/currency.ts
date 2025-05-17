@@ -32,7 +32,7 @@ function saveRatesToLocalStorage(rates: CurrencyRateMap) {
   }
 }
 
-let cachedRates: CurrencyRateMap = loadRatesFromLocalStorage() || { sat: SATS_PER_BTC };
+let cachedRates: CurrencyRateMap = loadRatesFromLocalStorage() || { sat: 1/SATS_PER_BTC };
 
 async function fetchRates(): Promise<CurrencyRateMap> {
   const res = await fetch(PRICE_FEED_URL);
@@ -41,7 +41,7 @@ async function fetchRates(): Promise<CurrencyRateMap> {
   const prices = data.prices;
   const btcUsd = prices['BTC/USD']?.rate;
   if (!btcUsd) throw new Error('BTC/USD rate missing');
-  const map: CurrencyRateMap = { sat: SATS_PER_BTC };
+  const map: CurrencyRateMap = { sat: 1/SATS_PER_BTC };
   map["USD"] = 1 / btcUsd;
   for (const key in prices) {
     if (key === 'BTC/USD') continue;

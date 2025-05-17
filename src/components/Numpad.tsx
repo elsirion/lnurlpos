@@ -38,6 +38,14 @@ const NumpadGrid: React.FC<NumpadGridProps> = ({ value, onNumpadClick }) => {
   );
 };
 
+// Helper to format large numbers with k, M, B, etc.
+function formatAbbrev(num: number): string {
+  if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+  return num.toFixed(1).replace(/\.0$/, '');
+}
+
 const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
@@ -117,8 +125,11 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
           className="text-2xl text-center"
           placeholder="0"
         />
-        <div className="text-xs text-gray-500 mt-1 text-center">
-          ≈ {satsValue} sats
+        <div className="text-xs text-gray-500 mt-1 ml-2 flex items-center justify-between">
+          <span>≈ {satsValue} sats</span>
+          {rateMap[currency] && (
+            <span className="ml-auto pl-2 mr-1">{formatAbbrev(1 / rateMap[currency])} {currency}/BTC</span>
+          )}
         </div>
       </div>
       <NumpadGrid value={amount} onNumpadClick={handleNumpad} />
