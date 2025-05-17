@@ -15,7 +15,7 @@ const NumpadGrid: React.FC<NumpadGridProps> = ({ value, onNumpadClick }) => {
     '1','2','3',
     '4','5','6',
     '7','8','9',
-    'C','0','⌫'
+    '.','0','⌫'
   ];
   return (
     <div className="grid grid-cols-3 gap-2 mb-2">
@@ -41,24 +41,38 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
   const [error, setError] = useState('');
 
   const handleNumpad = (val: string) => {
-    if (val === 'C') {
-      setAmount('');
+    if (val === '.') {
+      if (amount === '' || amount.includes('.')) return;
+      setAmount(amount + '.');
     } else if (val === '⌫') {
       setAmount(amount.slice(0, -1));
     } else {
-      if (amount.length < 9) setAmount(amount + val);
+      // Only allow up to 9 characters, including decimal point
+      if (amount.length >= 9) return;
+      // Prevent leading zeros
+      if (amount === '0' && val !== '.') return;
+      // If there's a decimal, only allow up to 2 digits after it
+      if (amount.includes('.')) {
+        const [intPart, decPart] = amount.split('.');
+        if (decPart.length >= 2) return;
+      }
+      setAmount(amount + val);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const num = parseInt(amount, 10);
-    if (!num || num < 1) {
+    if (!amount || amount === '.' || amount.endsWith('.')) {
+      setError('Please enter a valid amount.');
+      return;
+    }
+    const num = parseFloat(amount);
+    if (isNaN(num) || num < 0.01) {
       setError('Please enter a valid amount.');
       return;
     }
     setError('');
-    onSubmit(num);
+    onSubmit(Math.round(num * 100) / 100);
   };
 
   return (
@@ -67,8 +81,8 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
         <Label htmlFor="amount">Amount (sats)</Label>
         <TextInput
           id="amount"
-          type="number"
-          min={1}
+          type="text"
+          min={0.01}
           readOnly
           value={amount}
           className="text-2xl text-center"
