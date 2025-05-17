@@ -1,12 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AddressForm from './components/AddressForm';
 import Numpad from './components/Numpad';
 import PaymentSection from './components/PaymentSection';
 // import { Button } from 'flowbite-react';
 
+function getParam(name: string): string | null {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+function setParam(name: string, value: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set(name, value);
+  window.history.replaceState({}, '', url.toString());
+}
+
 const App: React.FC = () => {
   const [lnInput, setLnInput] = useState<string | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const lnurlParam = getParam('lnurl');
+    const lnaddressParam = getParam('lnaddress');
+    if (lnurlParam) setLnInput(lnurlParam);
+    else if (lnaddressParam) setLnInput(lnaddressParam);
+  }, []);
+
+  const handleAddressSubmit = (val: string) => {
+    if (val.match(/^lnurl[a-z0-9]+$/i)) {
+      setParam('lnurl', val);
+    } else if (val.includes('@')) {
+      setParam('lnaddress', val);
+    }
+    setLnInput(val);
+  };
 
   const handleBack = () => setAmount(null);
 
@@ -14,7 +40,7 @@ const App: React.FC = () => {
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">Lightning Point of Sale</h2>
       {!lnInput ? (
-        <AddressForm onSubmit={setLnInput} />
+        <AddressForm onSubmit={handleAddressSubmit} />
       ) : (
         <>
           {amount === null ? (
