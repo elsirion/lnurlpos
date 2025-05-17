@@ -15,11 +15,7 @@
           buildInputs = [
             pkgs.nodejs_20
             pkgs.pnpm
-            pkgs.git
           ];
-          shellHook = ''
-            # export NODE_OPTIONS=--openssl-legacy-provider
-          '';
         };
       }
     );
