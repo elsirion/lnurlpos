@@ -1,6 +1,6 @@
 # LNURL PoS
 
-A Lightning Point of Sale (PoS) web app based on [LUD-21](https://github.com/lnurl/luds/blob/master/18.md) (LNURL-pay with verify) for instant, verifiable Lightning payments. This project is designed for merchants and event organizers who want a simple, browser-based interface to accept Lightning payments into their existing Lightning wallet. The money is never held in the PoS app and goes right into the specified LNURL, reducing the risk of having large amounts of Bitcoin on you or having to trust employees with your wallet.
+A Lightning Point of Sale (PoS) web app based on [LUD-21](https://github.com/lnurl/luds/blob/master/21.md) (LNURL-pay with verify) for instant, verifiable Lightning payments. This project is designed for merchants and event organizers who want a simple, browser-based interface to accept Lightning payments into their existing Lightning wallet. The money is never held in the PoS app and goes right into the specified LNURL, reducing the risk of having large amounts of Bitcoin on you or having to trust employees with your wallet.
 
 <p align="center">
   <img src="./screenshots/setup.png" alt="Setup using LNURL" height="300"/>
