@@ -47,13 +47,14 @@ document.getElementById("app")!.innerHTML = `
     </form>
     <div id="invoice-section" style="display:none;" class="mt-8">
       <div class="bg-gray-100 rounded-lg p-4 flex flex-col items-center">
-        <div id="qr" class="mb-4"></div>
+        <div id="qr" class="mb-4 w-full"></div>
         <div class="w-full flex flex-col items-center">
-          <strong class="mb-1">Invoice:</strong>
           <div class="flex items-center w-full gap-2">
             <div id="invoice" class="truncate bg-white border border-gray-200 rounded-md px-2 py-1 text-xs w-full whitespace-nowrap select-all" aria-label="Lightning Invoice"></div>
-            <button id="copy-btn" type="button" class="ml-2 text-gray-500 hover:text-blue-700 focus:ring-2 focus:ring-blue-300 rounded-lg p-1.5" title="Copy invoice" aria-label="Copy invoice">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 4v2a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4m0 0a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2zm0 0v2m0 0a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4"/></svg>
+            <button id="copy-btn" type="button" class="flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:ring-2 focus:outline-none focus:ring-blue-300 transition-colors duration-200 h-[1.75rem] min-h-0" title="Copy invoice" aria-label="Copy invoice">
+              <svg class="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9 8v3a1 1 0 0 1-1 1H5m11 4h2a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v1m4 3v10a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7.13a1 1 0 0 1 .24-.65L7.7 8.35A1 1 0 0 1 8.46 8H13a1 1 0 0 1 1 1Z"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -116,9 +117,9 @@ document.querySelectorAll('.numpad-btn').forEach(btn => {
 // --- Existing PoS logic, only run if lnInputValue is set ---
 // Replace makeQR with async QR code generation using 'qrcode' as SVG
 async function makeQR(text: string, size = 256): Promise<string> {
-  const svg = await QRCode.toString(text, { type: 'svg', width: size, margin: 2 });
+  const svg = await QRCode.toString(text, { type: 'svg', margin: 2 });
   // Add Tailwind/Flowbite classes to the SVG root element
-  return svg.replace('<svg', `<svg class=\"rounded-lg border border-gray-300\" width=\"${size}\" height=\"${size}\"`);
+  return svg.replace('<svg', `<svg class=\"rounded-lg border border-gray-300 w-full\"`);
 }
 
 async function fetchJson(url: string) {
