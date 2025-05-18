@@ -10,18 +10,12 @@ const App: React.FC = () => {
   const [amount, setAmount] = useState<number | null>(null);
 
   useEffect(() => {
-    const lnurlParam = getParam('lnurl');
-    const lnaddressParam = getParam('lnaddress');
-    if (lnurlParam) setLnInput(lnurlParam);
-    else if (lnaddressParam) setLnInput(lnaddressParam);
+    const lnParam = getParam('ln');
+    if (lnParam) setLnInput(lnParam);
   }, []);
 
   const handleAddressSubmit = (val: string) => {
-    if (val.match(/^lnurl[a-z0-9]+$/i)) {
-      setParam('lnurl', val);
-    } else if (val.includes('@')) {
-      setParam('lnaddress', val);
-    }
+    setParam('ln', val);
     setLnInput(val);
   };
 
@@ -50,7 +44,11 @@ const App: React.FC = () => {
           <span
             className="text-xs text-blue-500 cursor-pointer hover:underline text-right block w-[120px]"
             title="Switch account"
-            onClick={() => setLnInput(null)}
+            onClick={() => {
+              setLnInput(null);
+              setParam('ln', '');
+              setParam('currency', '');
+            }}
           >
             Switch account
           </span>
