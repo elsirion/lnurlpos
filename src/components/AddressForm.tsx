@@ -1,13 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput, Button, Label } from 'flowbite-react';
 
 interface AddressFormProps {
   onSubmit: (value: string) => void;
 }
 
+const MAX_HISTORY = 3;
+const STORAGE_KEY = 'lnurlpos_address_history';
+
+const getStoredAddresses = (): string[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setStoredAddresses = (addresses: string[]) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(addresses));
+};
+
 const AddressForm: React.FC<AddressFormProps> = ({ onSubmit }) => {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    setHistory(getStoredAddresses());
+  }, []);
+
+  const saveToHistory = (address: string) => {
+    let newHistory = [address, ...history.filter(a => a !== address)];
+    if (newHistory.length > MAX_HISTORY) newHistory = newHistory.slice(0, MAX_HISTORY);
+    setHistory(newHistory);
+    setStoredAddresses(newHistory);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,10 +43,23 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSubmit }) => {
     if (!val) return;
     if (val.match(/^lnurl[a-z0-9]+$/i) || val.includes('@')) {
       setError('');
+      saveToHistory(val);
       onSubmit(val);
     } else {
       setError('Please enter a valid Lightning Address or LNURLp string.');
     }
+  };
+
+  const handleHistoryClick = (address: string) => {
+    saveToHistory(address);
+    onSubmit(address);
+  };
+
+  const handleDelete = (address: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newHistory = history.filter(a => a !== address);
+    setHistory(newHistory);
+    setStoredAddresses(newHistory);
   };
 
   return (
@@ -37,6 +78,37 @@ const AddressForm: React.FC<AddressFormProps> = ({ onSubmit }) => {
         {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
       </div>
       <Button type="submit" color="blue" className="w-full mt-4">Continue</Button>
+      {history.length > 0 && (
+        <div className="mt-6">
+          <Label className="text-gray-700 text-xs mb-2">Recent addresses</Label>
+          <ul className="space-y-2 mt-2">
+            {history.map(addr => (
+              <li key={addr}>
+                <div
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded px-3 py-2 cursor-pointer group transition"
+                  onClick={() => handleHistoryClick(addr)}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Use address ${addr}`}
+                >
+                  <span className="truncate text-sm text-blue-700 underline max-w-[200px] group-hover:text-gray-800 group-hover:no-underline transition dark:text-blue-400 dark:group-hover:text-gray-100">{addr}</span>
+                  <Button
+                    size="xs"
+                    color="light"
+                    className="ml-2"
+                    onClick={e => handleDelete(addr, e)}
+                    aria-label={`Delete address ${addr}`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="flex justify-center mt-10">
         <a
           href="https://github.com/elsirion/lnurlpos"
