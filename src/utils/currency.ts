@@ -43,14 +43,25 @@ async function fetchRates(): Promise<CurrencyRateMap> {
   if (!btcUsd) throw new Error('BTC/USD rate missing');
   const map: CurrencyRateMap = { sat: 1/SATS_PER_BTC };
   map["USD"] = 1 / btcUsd;
-  for (const key in prices) {
-    if (key === 'BTC/USD') continue;
-    const [cur, quote] = key.split('/');
-    if (quote !== 'USD') continue;
-    const rate = prices[key].rate;
-    // Conversion: 1 unit of cur = (rate / btcUsd) BTC
-    map[cur] = rate / btcUsd;
-  }
+
+  // Get all [key, value] pairs for currencies quoted in USD, excluding BTC/USD, USD, and sat
+  const sortedCurrencies = Object.entries(prices)
+    .filter(([key]) => {
+      if (key === 'BTC/USD') return false;
+      const [cur, quote] = key.split('/');
+      return quote === 'USD' && cur !== 'USD' && cur !== 'sat';
+    })
+    .map(([key, value]) => {
+      const [cur] = key.split('/');
+      return { key: cur, rate: value.rate / btcUsd };
+    })
+    .sort((a, b) => a.key.localeCompare(b.key));
+
+  // Add sorted currencies to map
+  sortedCurrencies.forEach(({ key, rate }) => {
+    map[key] = rate;
+  });
+
   return map;
 }
 
