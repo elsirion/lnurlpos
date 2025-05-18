@@ -5,6 +5,7 @@ import { getParam, setParam } from '../utils/urlParams';
 
 interface NumpadProps {
   onSubmit: (amount: number) => void;
+  lnInput: string;
 }
 
 interface NumpadGridProps {
@@ -46,11 +47,46 @@ function formatAbbrev(num: number): string {
   return num.toFixed(1).replace(/\.0$/, '');
 }
 
-const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
+const NUMPAD_CURRENCY_KEY = 'lnurlpos_last_currency';
+
+function getLastCurrencyForLnInput(lnInput: string): string | null {
+  try {
+    const data = localStorage.getItem(NUMPAD_CURRENCY_KEY);
+    if (!data) return null;
+    const map = JSON.parse(data);
+    return map[lnInput] || null;
+  } catch {
+    return null;
+  }
+}
+
+function setLastCurrencyForLnInput(lnInput: string, currency: string) {
+  try {
+    const data = localStorage.getItem(NUMPAD_CURRENCY_KEY);
+    const map = data ? JSON.parse(data) : {};
+    map[lnInput] = currency;
+    localStorage.setItem(NUMPAD_CURRENCY_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
+
+const Numpad: React.FC<NumpadProps> = ({ onSubmit, lnInput }) => {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const [currencies, setCurrencies] = useState<string[]>(['sat']);
-  const [currency, setCurrency] = useState<string>(getParam('currency') || 'sat');
+  const [currency, setCurrency] = useState<string>(() => {
+    const urlCur = getParam('currency');
+    if (urlCur) {
+      setLastCurrencyForLnInput(lnInput, urlCur);
+      return urlCur;
+    }
+    if (lnInput) {
+      const last = getLastCurrencyForLnInput(lnInput);
+      if (last) return last;
+    }
+    return 'sat';
+  });
   const [rateMap, setRateMap] = useState<{ [k: string]: number }>({ sat: 1e-8 });
 
   useEffect(() => {
@@ -63,7 +99,8 @@ const Numpad: React.FC<NumpadProps> = ({ onSubmit }) => {
 
   useEffect(() => {
     setParam('currency', currency);
-  }, [currency]);
+    if (lnInput) setLastCurrencyForLnInput(lnInput, currency);
+  }, [currency, lnInput]);
 
   const handleNumpad = (val: string) => {
     if (val === '.') {

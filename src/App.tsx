@@ -35,7 +35,7 @@ const App: React.FC = () => {
       ) : (
         <>
           {amount === null ? (
-            <Numpad onSubmit={setAmount} />
+            <Numpad onSubmit={setAmount} lnInput={lnInput} />
           ) : (
             <PaymentSection lnInput={lnInput} amount={amount} onBack={handleBack} />
           )}
